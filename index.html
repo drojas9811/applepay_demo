@@ -1,392 +1,502 @@
 <!doctype html>
 <html lang="es">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>DEUNA SDK · Tester</title>
-<script src="https://cdn.deuna.io/web-sdk/v1.6/index.js" defer></script>
-<style>
-  :root{
-    --bg:#0f1115;
-    --panel:#161923;
-    --panel-2:#1c202c;
-    --border:#2a2f3d;
-    --text:#e7e9ee;
-    --muted:#8b92a5;
-    --accent:#5ee6c9;
-    --accent-dim:#3aa88f;
-    --danger:#ff6b6b;
-    --warn:#ffbe5c;
-    --mono: 'SFMono-Regular', ui-monospace, Menlo, Consolas, monospace;
-    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif;
-  }
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
-  body{
-    background:var(--bg);
-    color:var(--text);
-    font-family:var(--sans);
-    min-height:100vh;
-    padding:20px;
-    display:flex;
-    justify-content:center;
-  }
-  .wrap{
-    width:100%;
-    max-width:480px;
-  }
-  header{
-    margin-bottom:18px;
-  }
-  header h1{
-    font-size:1.05rem;
-    font-weight:650;
-    margin:0 0 2px;
-    letter-spacing:0.2px;
-    display:flex;
-    align-items:center;
-    gap:8px;
-  }
-  header h1 .dot{
-    width:8px;height:8px;border-radius:50%;
-    background:var(--accent);
-    box-shadow:0 0 8px var(--accent);
-    flex-shrink:0;
-  }
-  header p{
-    margin:0;
-    font-size:0.8rem;
-    color:var(--muted);
-  }
-  .card{
-    background:var(--panel);
-    border:1px solid var(--border);
-    border-radius:14px;
-    padding:16px;
-    margin-bottom:14px;
-  }
-  label{
-    display:block;
-    font-size:0.72rem;
-    text-transform:uppercase;
-    letter-spacing:0.06em;
-    color:var(--muted);
-    margin-bottom:6px;
-    font-weight:600;
-  }
-  .field{margin-bottom:12px;}
-  .field:last-child{margin-bottom:0;}
-  input[type="text"], select{
-    width:100%;
-    background:var(--panel-2);
-    border:1px solid var(--border);
-    color:var(--text);
-    padding:10px 11px;
-    border-radius:9px;
-    font-family:var(--mono);
-    font-size:0.82rem;
-    outline:none;
-    transition:border-color .15s ease;
-  }
-  input[type="text"]::placeholder{color:#4d5266;}
-  input[type="text"]:focus, select:focus{
-    border-color:var(--accent-dim);
-  }
-  select{
-    font-family:var(--sans);
-    appearance:none;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238b92a5'/%3E%3C/svg%3E");
-    background-repeat:no-repeat;
-    background-position:right 12px center;
-    padding-right:30px;
-  }
-  .pay-btn{
-    width:100%;
-    padding:13px;
-    border:none;
-    border-radius:10px;
-    background:var(--accent);
-    color:#0b1210;
-    font-weight:700;
-    font-size:0.92rem;
-    cursor:pointer;
-    letter-spacing:0.2px;
-    transition:transform .1s ease, background .15s ease, opacity .15s ease;
-  }
-  .pay-btn:hover{background:#7bf0d6;}
-  .pay-btn:active{transform:scale(0.98);}
-  .pay-btn:disabled{
-    opacity:0.5;
-    cursor:not-allowed;
-  }
-  .pay-btn .spinner{
-    display:inline-block;
-    width:13px;height:13px;
-    border:2px solid #0b1210;
-    border-top-color:transparent;
-    border-radius:50%;
-    margin-right:7px;
-    vertical-align:-2px;
-    animation:spin .7s linear infinite;
-  }
-  @keyframes spin{to{transform:rotate(360deg);}}
-
-  .log-header{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    margin-bottom:10px;
-  }
-  .log-header h2{
-    font-size:0.78rem;
-    text-transform:uppercase;
-    letter-spacing:0.06em;
-    color:var(--muted);
-    font-weight:600;
-    margin:0;
-  }
-  .clear-btn{
-    background:none;
-    border:1px solid var(--border);
-    color:var(--muted);
-    font-size:0.7rem;
-    padding:4px 9px;
-    border-radius:6px;
-    cursor:pointer;
-  }
-  .clear-btn:hover{color:var(--text);border-color:#3d4356;}
-  .log-box{
-    background:#0a0c10;
-    border:1px solid var(--border);
-    border-radius:10px;
-    height:220px;
-    overflow-y:auto;
-    overflow-x:auto;
-    padding:10px 12px;
-    font-family:var(--mono);
-    font-size:0.72rem;
-    line-height:1.5;
-  }
-  .log-box::-webkit-scrollbar{width:7px;height:7px;}
-  .log-box::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
-  .log-empty{color:#3d4356;font-style:italic;white-space:nowrap;}
-  .log-line{
-    display:flex;
-    gap:8px;
-    padding:3px 0;
-    border-bottom:1px solid #14171f;
-    white-space:nowrap;
-    width:max-content;
-    min-width:100%;
-  }
-  .log-line:last-child{border-bottom:none;}
-  .log-time{color:#4d5266;flex-shrink:0;}
-  .log-tag{
-    flex-shrink:0;
-    font-weight:700;
-  }
-  .log-tag.ok{color:var(--accent);}
-  .log-tag.err{color:var(--danger);}
-  .log-tag.info{color:var(--warn);}
-  .log-tag.neutral{color:#8b92a5;}
-  .log-payload{
-    color:#c3c8d4;
-    white-space:pre;
-  }
-  #sdk-mount{
-    display:none;
-  }
-  footer{
-    text-align:center;
-    margin-top:16px;
-    font-size:0.7rem;
-    color:#4d5266;
-  }
-  @media (max-width:400px){
-    body{padding:14px;}
-    .card{padding:13px;}
-  }
-</style>
-</head>
-<body>
-<div class="wrap">
-  <header>
-    <h1><span class="dot"></span>DEUNA SDK Tester</h1>
-    <p>Config rápida para probar el Web SDK de pagos</p>
-  </header>
-
-  <div class="card">
-    <div class="field">
-      <label for="apiKey">Public API Key</label>
-      <input type="text" id="apiKey" placeholder="pk_..." autocomplete="off" spellcheck="false" />
-    </div>
-    <div class="field">
-      <label for="orderToken">Order Token</label>
-      <input type="text" id="orderToken" placeholder="order token" autocomplete="off" spellcheck="false" />
-    </div>
-    <div class="field">
-      <label for="env">Entorno</label>
-      <select id="env">
-        <option value="sandbox" selected>sandbox</option>
-        <option value="production">production</option>
-      </select>
-    </div>
-    <button class="clear-btn" id="clearStorageBtn" style="width:100%;margin-top:4px;">Olvidar credenciales guardadas</button>
-  </div>
-
-  <button class="pay-btn" id="payBtn">Pagar</button>
-
-  <div class="card" style="margin-top:14px;">
-    <div class="log-header">
-      <h2>Callbacks</h2>
-      <button class="clear-btn" id="clearBtn">Limpiar</button>
-    </div>
-    <div class="log-box" id="logBox">
-      <div class="log-empty">Los eventos del SDK van a aparecer acá...</div>
-    </div>
-  </div>
-
-  <div id="sdk-mount"></div>
-
-  <footer>Widget renderizado por el Web SDK de DEUNA</footer>
-</div>
-
-<script>
-const logBox = document.getElementById('logBox');
-const payBtn = document.getElementById('payBtn');
-
-// --- Persistencia en localStorage ---
-const STORAGE_KEYS = {
-  apiKey: 'deuna_public_api_key',
-  orderToken: 'deuna_order_token',
-  env: 'deuna_env',
-};
-
-function restoreSavedValues(){
-  const savedApiKey = localStorage.getItem(STORAGE_KEYS.apiKey);
-  const savedToken = localStorage.getItem(STORAGE_KEYS.orderToken);
-  const savedEnv = localStorage.getItem(STORAGE_KEYS.env);
-
-  if (savedApiKey) document.getElementById('apiKey').value = savedApiKey;
-  if (savedToken) document.getElementById('orderToken').value = savedToken;
-  if (savedEnv) document.getElementById('env').value = savedEnv;
-}
-
-function wireAutoSave(){
-  document.getElementById('apiKey').addEventListener('input', (e) => {
-    localStorage.setItem(STORAGE_KEYS.apiKey, e.target.value);
-  });
-  document.getElementById('orderToken').addEventListener('input', (e) => {
-    localStorage.setItem(STORAGE_KEYS.orderToken, e.target.value);
-  });
-  document.getElementById('env').addEventListener('change', (e) => {
-    localStorage.setItem(STORAGE_KEYS.env, e.target.value);
-  });
-}
-
-restoreSavedValues();
-wireAutoSave();
-
-document.getElementById('clearStorageBtn').addEventListener('click', () => {
-  localStorage.removeItem(STORAGE_KEYS.apiKey);
-  localStorage.removeItem(STORAGE_KEYS.orderToken);
-  localStorage.removeItem(STORAGE_KEYS.env);
-  document.getElementById('apiKey').value = '';
-  document.getElementById('orderToken').value = '';
-  document.getElementById('env').value = 'sandbox';
-  log('info', 'storage:cleared');
-});
-
-function fmtTime(){
-  const d = new Date();
-  return d.toTimeString().split(' ')[0] + '.' + String(d.getMilliseconds()).padStart(3,'0');
-}
-
-function log(tag, label, payload){
-  const empty = logBox.querySelector('.log-empty');
-  if (empty) empty.remove();
-
-  const line = document.createElement('div');
-  line.className = 'log-line';
-
-  const time = document.createElement('span');
-  time.className = 'log-time';
-  time.textContent = fmtTime();
-
-  const tagEl = document.createElement('span');
-  tagEl.className = 'log-tag ' + tag;
-  tagEl.textContent = label;
-
-  const payloadEl = document.createElement('span');
-  payloadEl.className = 'log-payload';
-  if (payload !== undefined) {
-    try {
-      payloadEl.textContent = typeof payload === 'string' ? payload : JSON.stringify(payload);
-    } catch(e) {
-      payloadEl.textContent = String(payload);
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DEUNA SDK · Tester</title>
+  <script src="https://cdn.deuna.io/web-sdk/v1.6/index.js" defer></script>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #161923;
+      --panel-2: #1c202c;
+      --border: #2a2f3d;
+      --text: #e7e9ee;
+      --muted: #8b92a5;
+      --accent: #5ee6c9;
+      --accent-dim: #3aa88f;
+      --danger: #ff6b6b;
+      --warn: #ffbe5c;
+      --mono: 'SFMono-Regular', ui-monospace, Menlo, Consolas, monospace;
+      --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif;
     }
-  }
 
-  line.appendChild(time);
-  line.appendChild(tagEl);
-  if (payload !== undefined) line.appendChild(payloadEl);
-  logBox.appendChild(line);
-  logBox.scrollTop = logBox.scrollHeight;
-}
+    * {
+      box-sizing: border-box;
+    }
 
-document.getElementById('clearBtn').addEventListener('click', () => {
-  logBox.innerHTML = '<div class="log-empty">Los eventos del SDK van a aparecer acá...</div>';
-});
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+    }
 
-function setLoading(isLoading){
-  payBtn.disabled = isLoading;
-  payBtn.innerHTML = isLoading ? '<span class="spinner"></span>Cargando...' : 'Pagar';
-}
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
 
-payBtn.addEventListener('click', async () => {
-  const publicApiKey = document.getElementById('apiKey').value.trim();
-  const orderToken = document.getElementById('orderToken').value.trim();
-  const env = document.getElementById('env').value;
+    .wrap {
+      width: 100%;
+      max-width: 480px;
+    }
 
-  if (!publicApiKey || !orderToken) {
-    log('err', 'validation', 'Completá el Public API Key y el Order Token antes de pagar.');
-    return;
-  }
+    header {
+      margin-bottom: 18px;
+    }
 
-  if (typeof DeunaSDK === 'undefined') {
-    log('err', 'sdk-error', 'DeunaSDK no está cargado todavía. Esperá un segundo y reintentá.');
-    return;
-  }
+    header h1 {
+      font-size: 1.05rem;
+      font-weight: 650;
+      margin: 0 0 2px;
+      letter-spacing: 0.2px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
-  setLoading(true);
-  log('info', 'init', { env });
+    header h1 .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+      flex-shrink: 0;
+    }
 
-  try {
-    await DeunaSDK.initialize({
-      publicApiKey,
-      env,
+    header p {
+      margin: 0;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .field {
+      margin-bottom: 12px;
+    }
+
+    .field:last-child {
+      margin-bottom: 0;
+    }
+
+    input[type="text"],
+    select {
+      width: 100%;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 11px;
+      border-radius: 9px;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      outline: none;
+      transition: border-color .15s ease;
+    }
+
+    input[type="text"]::placeholder {
+      color: #4d5266;
+    }
+
+    input[type="text"]:focus,
+    select:focus {
+      border-color: var(--accent-dim);
+    }
+
+    select {
+      font-family: var(--sans);
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238b92a5'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 30px;
+    }
+
+    .pay-btn {
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: 10px;
+      background: var(--accent);
+      color: #0b1210;
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+      letter-spacing: 0.2px;
+      transition: transform .1s ease, background .15s ease, opacity .15s ease;
+    }
+
+    .pay-btn:hover {
+      background: #7bf0d6;
+    }
+
+    .pay-btn:active {
+      transform: scale(0.98);
+    }
+
+    .pay-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .pay-btn .spinner {
+      display: inline-block;
+      width: 13px;
+      height: 13px;
+      border: 2px solid #0b1210;
+      border-top-color: transparent;
+      border-radius: 50%;
+      margin-right: 7px;
+      vertical-align: -2px;
+      animation: spin .7s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .log-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .log-header h2 {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .clear-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.7rem;
+      padding: 4px 9px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .clear-btn:hover {
+      color: var(--text);
+      border-color: #3d4356;
+    }
+
+    .log-box {
+      background: #0a0c10;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      height: 220px;
+      overflow-y: auto;
+      overflow-x: auto;
+      padding: 10px 12px;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      line-height: 1.5;
+    }
+
+    .log-box::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+
+    .log-box::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    .log-empty {
+      color: #3d4356;
+      font-style: italic;
+      white-space: nowrap;
+    }
+
+    .log-line {
+      display: flex;
+      gap: 8px;
+      padding: 3px 0;
+      border-bottom: 1px solid #14171f;
+      white-space: nowrap;
+      width: max-content;
+      min-width: 100%;
+    }
+
+    .log-line:last-child {
+      border-bottom: none;
+    }
+
+    .log-time {
+      color: #4d5266;
+      flex-shrink: 0;
+    }
+
+    .log-tag {
+      flex-shrink: 0;
+      font-weight: 700;
+    }
+
+    .log-tag.ok {
+      color: var(--accent);
+    }
+
+    .log-tag.err {
+      color: var(--danger);
+    }
+
+    .log-tag.info {
+      color: var(--warn);
+    }
+
+    .log-tag.neutral {
+      color: #8b92a5;
+    }
+
+    .log-payload {
+      color: #c3c8d4;
+      white-space: pre;
+    }
+
+    #sdk-mount {
+      display: none;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 16px;
+      font-size: 0.7rem;
+      color: #4d5266;
+    }
+
+    @media (max-width:400px) {
+      body {
+        padding: 14px;
+      }
+
+      .card {
+        padding: 13px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <h1><span class="dot"></span>DEUNA SDK Tester</h1>
+      <p>Config rápida para probar el Web SDK de pagos</p>
+    </header>
+
+    <div class="card">
+      <div class="field">
+        <label for="apiKey">Public API Key</label>
+        <input type="text" id="apiKey" placeholder="pk_..." autocomplete="off" spellcheck="false" />
+      </div>
+      <div class="field">
+        <label for="orderToken">Order Token</label>
+        <input type="text" id="orderToken" placeholder="order token" autocomplete="off" spellcheck="false" />
+      </div>
+      <div class="field">
+        <label for="env">Entorno</label>
+        <select id="env">
+          <option value="sandbox" selected>sandbox</option>
+          <option value="production">production</option>
+        </select>
+      </div>
+      <button class="clear-btn" id="clearStorageBtn" style="width:100%;margin-top:4px;">Olvidar credenciales
+        guardadas</button>
+    </div>
+
+    <button class="pay-btn" id="payBtn">Pagar</button>
+
+    <div class="card" style="margin-top:14px;">
+      <div class="log-header">
+        <h2>Callbacks</h2>
+        <button class="clear-btn" id="clearBtn">Limpiar</button>
+      </div>
+      <div class="log-box" id="logBox">
+        <div class="log-empty">Los eventos del SDK van a aparecer acá...</div>
+      </div>
+    </div>
+
+    <div id="sdk-mount"></div>
+
+    <footer>Widget renderizado por el Web SDK de DEUNA</footer>
+  </div>
+
+  <script>
+    const logBox = document.getElementById('logBox');
+    const payBtn = document.getElementById('payBtn');
+
+    // --- Persistencia en localStorage ---
+    const STORAGE_KEYS = {
+      apiKey: 'deuna_public_api_key',
+      orderToken: 'deuna_order_token',
+      env: 'deuna_env',
+    };
+
+    function restoreSavedValues() {
+      const savedApiKey = localStorage.getItem(STORAGE_KEYS.apiKey);
+      const savedToken = localStorage.getItem(STORAGE_KEYS.orderToken);
+      const savedEnv = localStorage.getItem(STORAGE_KEYS.env);
+
+      if (savedApiKey) document.getElementById('apiKey').value = savedApiKey;
+      if (savedToken) document.getElementById('orderToken').value = savedToken;
+      if (savedEnv) document.getElementById('env').value = savedEnv;
+    }
+
+    function wireAutoSave() {
+      document.getElementById('apiKey').addEventListener('input', (e) => {
+        localStorage.setItem(STORAGE_KEYS.apiKey, e.target.value);
+      });
+      document.getElementById('orderToken').addEventListener('input', (e) => {
+        localStorage.setItem(STORAGE_KEYS.orderToken, e.target.value);
+      });
+      document.getElementById('env').addEventListener('change', (e) => {
+        localStorage.setItem(STORAGE_KEYS.env, e.target.value);
+      });
+    }
+
+    restoreSavedValues();
+    wireAutoSave();
+
+    document.getElementById('clearStorageBtn').addEventListener('click', () => {
+      localStorage.removeItem(STORAGE_KEYS.apiKey);
+      localStorage.removeItem(STORAGE_KEYS.orderToken);
+      localStorage.removeItem(STORAGE_KEYS.env);
+      document.getElementById('apiKey').value = '';
+      document.getElementById('orderToken').value = '';
+      document.getElementById('env').value = 'sandbox';
+      log('info', 'storage:cleared');
     });
-    log('ok', 'initialize:ok');
 
-    await DeunaSDK.initPaymentWidget({
-      orderToken,
-      callbacks: {
-        onCardBinDetected: () => log('neutral', 'onCardBinDetected'),
-        onClosed: (action) => { log('neutral', 'onClosed', action); setLoading(false); },
-        onError: (payload) => { log('err', 'onError', payload); setLoading(false); },
-        onInstallmentSelected: (payload) => log('neutral', 'onInstallmentSelected', payload),
-        onPaymentProcessing: () => log('info', 'onPaymentProcessing'),
-        onSuccess: (payload) => { log('ok', 'onSuccess', payload); setLoading(false); },
-        onEventDispatch: (type, data) => log('neutral', 'event:' + type, data),
-      },
+    function fmtTime() {
+      const d = new Date();
+      return d.toTimeString().split(' ')[0] + '.' + String(d.getMilliseconds()).padStart(3, '0');
+    }
+
+    function log(tag, label, payload) {
+      const empty = logBox.querySelector('.log-empty');
+      if (empty) empty.remove();
+
+      const line = document.createElement('div');
+      line.className = 'log-line';
+
+      const time = document.createElement('span');
+      time.className = 'log-time';
+      time.textContent = fmtTime();
+
+      const tagEl = document.createElement('span');
+      tagEl.className = 'log-tag ' + tag;
+      tagEl.textContent = label;
+
+      const payloadEl = document.createElement('span');
+      payloadEl.className = 'log-payload';
+      if (payload !== undefined) {
+        try {
+          payloadEl.textContent = typeof payload === 'string' ? payload : JSON.stringify(payload);
+        } catch (e) {
+          payloadEl.textContent = String(payload);
+        }
+      }
+
+      line.appendChild(time);
+      line.appendChild(tagEl);
+      if (payload !== undefined) line.appendChild(payloadEl);
+      logBox.appendChild(line);
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      logBox.innerHTML = '<div class="log-empty">Los eventos del SDK van a aparecer acá...</div>';
     });
-    log('ok', 'widget:mounted');
-    setLoading(false);
-  } catch (error) {
-    log('err', 'exception', error && error.message ? error.message : error);
-    setLoading(false);
-  }
-});
-</script>
+
+    function setLoading(isLoading) {
+      payBtn.disabled = isLoading;
+      payBtn.innerHTML = isLoading ? '<span class="spinner"></span>Cargando...' : 'Pagar';
+    }
+
+    payBtn.addEventListener('click', async () => {
+      const publicApiKey = document.getElementById('apiKey').value.trim();
+      const orderToken = document.getElementById('orderToken').value.trim();
+      const env = document.getElementById('env').value;
+
+      if (!publicApiKey || !orderToken) {
+        log('err', 'validation', 'Completá el Public API Key y el Order Token antes de pagar.');
+        return;
+      }
+
+      if (typeof DeunaSDK === 'undefined') {
+        log('err', 'sdk-error', 'DeunaSDK no está cargado todavía. Esperá un segundo y reintentá.');
+        return;
+      }
+
+      setLoading(true);
+      log('info', 'init', { env });
+
+      try {
+        await DeunaSDK.initialize({
+          publicApiKey,
+          env,
+        });
+        log('ok', 'initialize:ok');
+
+        await DeunaSDK.initPaymentWidget({
+          orderToken,
+          paymentMethods: [
+            {
+              paymentMethod: "card_wallet",
+              processors: ["apple_pay"],
+              configuration: {
+                // express: true // AUTO PURCHASE
+              },
+            },
+          ],
+          callbacks: {
+            onCardBinDetected: () => log('neutral', 'onCardBinDetected'),
+            onClosed: (action) => { log('neutral', 'onClosed', action); setLoading(false); },
+            onError: (payload) => { log('err', 'onError', payload); setLoading(false); },
+            onInstallmentSelected: (payload) => log('neutral', 'onInstallmentSelected', payload),
+            onPaymentProcessing: () => log('info', 'onPaymentProcessing'),
+            onSuccess: (payload) => { log('ok', 'onSuccess', payload); setLoading(false); },
+            onEventDispatch: (type, data) => log('neutral', 'event:' + type, data),
+          },
+        });
+        log('ok', 'widget:mounted');
+        setLoading(false);
+      } catch (error) {
+        log('err', 'exception', error && error.message ? error.message : error);
+        setLoading(false);
+      }
+    });
+  </script>
 </body>
+
 </html>
