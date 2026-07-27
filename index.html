@@ -470,15 +470,6 @@
 
         await DeunaSDK.initPaymentWidget({
           orderToken,
-          paymentMethods: [
-            {
-              paymentMethod: "card_wallet",
-              processors: ["apple_pay"],
-              configuration: {
-                // express: true // AUTO PURCHASE
-              },
-            },
-          ],
           callbacks: {
             onCardBinDetected: () => {
               console.log('onCardBinDetected');
