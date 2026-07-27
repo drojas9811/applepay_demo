@@ -470,23 +470,46 @@
 
         await DeunaSDK.initPaymentWidget({
           orderToken,
-          paymentMethods: [
-            {
-              paymentMethod: "card_wallet",
-              processors: ["apple_pay"],
-              configuration: {
-                // express: true // AUTO PURCHASE
-              },
-            },
-          ],
           callbacks: {
-            onCardBinDetected: () => log('neutral', 'onCardBinDetected'),
-            onClosed: (action) => { log('neutral', 'onClosed', action); setLoading(false); },
-            onError: (payload) => { log('err', 'onError', payload); setLoading(false); },
-            onInstallmentSelected: (payload) => log('neutral', 'onInstallmentSelected', payload),
-            onPaymentProcessing: () => log('info', 'onPaymentProcessing'),
-            onSuccess: (payload) => { log('ok', 'onSuccess', payload); setLoading(false); },
-            onEventDispatch: (type, data) => log('neutral', 'event:' + type, data),
+            onCardBinDetected: () => {
+              console.log('onCardBinDetected');
+              log('neutral', 'onCardBinDetected');
+            },
+            onClosed: (action) => {
+              console.log('onClosed', action);
+              log('neutral', 'onClosed', action);
+              setLoading(false);
+            },
+            onError: (payload) => {
+              console.log('onError', payload);
+              log('err', 'onError', payload);
+              setLoading(false);
+            },
+            onInstallmentSelected: (payload) => {
+              console.log('onInstallmentSelected', payload);
+              log('neutral', 'onInstallmentSelected', payload);
+            },
+            onPaymentProcessing: () => {
+              console.log('onPaymentProcessing');
+              log('info', 'onPaymentProcessing');
+            },
+            onSuccess: async (payload) => {
+              console.log('onSuccess', payload);
+              log('ok', 'onSuccess', payload);
+              try {
+                await DeunaSDK.close();
+                console.log('DeunaSDK.close():ok');
+                log('ok', 'widget:closed');
+              } catch (closeError) {
+                console.log('DeunaSDK.close():error', closeError);
+                log('err', 'close:error', closeError && closeError.message ? closeError.message : closeError);
+              }
+              setLoading(false);
+            },
+            onEventDispatch: (type, data) => {
+              console.log('Event type: ', type, 'Event data:', data);
+              log('neutral', 'event:' + type, data);
+            },
           },
         });
         log('ok', 'widget:mounted');
