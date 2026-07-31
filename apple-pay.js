@@ -53,6 +53,15 @@
     log('info', 'apple:storage:cleared');
   });
 
+  // DEUNA STEP — the `domain` the widget needs is different per environment
+  // (and per merchant — this one is Aeromexico's). Confirm the equivalent
+  // URL for whichever merchant you're demoing if it's not Aeromexico.
+  function domainForEnv(env) {
+    return env === 'production'
+      ? 'https://pay.deuna.com'
+      : 'https://aeromexico.pay.sandbox.deuna.com';
+  }
+
   // ---- Main flow: initialize the SDK, then mount the payment widget ----
   payBtn.addEventListener('click', async () => {
     const publicApiKey = document.getElementById('apiKeyApple').value.trim();
@@ -94,15 +103,16 @@
         // Render button for Apple Pay and append a listener (EXAMPLE)
         DeunaSDK.initPaymentWidget({
           orderToken,
-         /* paymentMethods: [
-            {
-              paymentMethod: 'card_wallet',
-              processors: ['apple_pay'],
-              configuration: {
-                // express: true // uncomment for auto-purchase / one-tap flow
-              },
-            },
-          ],*/
+          /* paymentMethods: [
+             {
+               paymentMethod: 'card_wallet',
+               processors: ['apple_pay'],
+               configuration: {
+                 // express: true // uncomment for auto-purchase / one-tap flow
+               },
+             },
+           ],*/
+          domain: domainForEnv(env),
           callbacks: {
             // DEUNA STEP — fires when the widget detects a card BIN as the
             // user types (not relevant to Apple Pay itself, but part of the
