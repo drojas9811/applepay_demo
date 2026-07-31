@@ -83,6 +83,8 @@
 
       // If Apple Pay is available, it should return it within an array, such as: ["APPLE_PAY"]
       const available = await DeunaSDK.getWalletsAvailable();
+      log('available? : ', available)
+      log ('available.includes("APPLE_PAY") ', available.includes('APPLE_PAY'),' o ', available.includes('apple_pay'))
 
       // DEUNA STEP — mount the payment widget for a specific order. The
       // `paymentMethods` filter below restricts the widget to just Apple Pay
