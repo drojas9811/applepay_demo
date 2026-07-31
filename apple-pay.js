@@ -83,8 +83,6 @@
 
       // If Apple Pay is available, it should return it within an array, such as: ["APPLE_PAY"]
       const available = await DeunaSDK.getWalletsAvailable();
-      log('available? : ', available)
-      log ('available.includes("APPLE_PAY") ', available.includes('APPLE_PAY'),' o ', available.includes('apple_pay'))
 
       // DEUNA STEP — mount the payment widget for a specific order. The
       // `paymentMethods` filter below restricts the widget to just Apple Pay
@@ -92,72 +90,71 @@
       // for the merchant instead.
 
       if (available.includes('APPLE_PAY')) {
+        log('Apple pay is available.')
         // Render button for Apple Pay and append a listener (EXAMPLE)
-        btn.addEventListener('click', () => {
-          DeunaSDK.initPaymentWidget({
-            orderToken,
-            /*
-            paymentMethods: [
-              {
-                paymentMethod: 'card_wallet',
-                processors: ['apple_pay'],
-                configuration: {
-                  // express: true // uncomment for auto-purchase / one-tap flow
-                },
-              },
-            ],
-            */
-            callbacks: {
-              // DEUNA STEP — fires when the widget detects a card BIN as the
-              // user types (not relevant to Apple Pay itself, but part of the
-              // same widget callback surface).
-              onCardBinDetected: () => {
-                log('neutral', 'apple:onCardBinDetected');
-              },
-
-              // DEUNA STEP — user closed the widget without completing payment.
-              onClosed: (action) => {
-                log('neutral', 'apple:onClosed', action);
-                setLoading(payBtn, false, 'Pagar');
-              },
-
-              // DEUNA STEP — payment failed. Payload has DEUNA's error detail.
-              onError: (payload) => {
-                log('err', 'apple:onError', payload);
-                setLoading(payBtn, false, 'Pagar');
-              },
-
-              // DEUNA STEP — user picked an installment plan (if enabled).
-              onInstallmentSelected: (payload) => {
-                log('neutral', 'apple:onInstallmentSelected', payload);
-              },
-
-              // DEUNA STEP — payment submitted, waiting on the processor/Apple.
-              onPaymentProcessing: () => {
-                log('info', 'apple:onPaymentProcessing');
-              },
-
-              // DEUNA STEP — payment succeeded. We explicitly close the widget
-              // afterwards — DEUNA doesn't auto-close it for us.
-              onSuccess: async (payload) => {
-                log('ok', 'apple:onSuccess', payload);
-                try {
-                  await DeunaSDK.close();
-                  log('ok', 'apple:widget:closed');
-                } catch (closeError) {
-                  log('err', 'apple:close:error', closeError && closeError.message ? closeError.message : closeError);
-                }
-                setLoading(payBtn, false, 'Pagar');
-              },
-
-              // DEUNA STEP — catch-all event stream from the widget (analytics,
-              // step tracking, etc). Useful for debugging things not covered by
-              // the callbacks above.
-              onEventDispatch: (type, data) => {
-                log('neutral', 'apple:event:' + type, data);
+        DeunaSDK.initPaymentWidget({
+          orderToken,
+          /*
+          paymentMethods: [
+            {
+              paymentMethod: 'card_wallet',
+              processors: ['apple_pay'],
+              configuration: {
+                // express: true // uncomment for auto-purchase / one-tap flow
               },
             },
-          });
+          ],
+          */
+          callbacks: {
+            // DEUNA STEP — fires when the widget detects a card BIN as the
+            // user types (not relevant to Apple Pay itself, but part of the
+            // same widget callback surface).
+            onCardBinDetected: () => {
+              log('neutral', 'apple:onCardBinDetected');
+            },
+
+            // DEUNA STEP — user closed the widget without completing payment.
+            onClosed: (action) => {
+              log('neutral', 'apple:onClosed', action);
+              setLoading(payBtn, false, 'Pagar');
+            },
+
+            // DEUNA STEP — payment failed. Payload has DEUNA's error detail.
+            onError: (payload) => {
+              log('err', 'apple:onError', payload);
+              setLoading(payBtn, false, 'Pagar');
+            },
+
+            // DEUNA STEP — user picked an installment plan (if enabled).
+            onInstallmentSelected: (payload) => {
+              log('neutral', 'apple:onInstallmentSelected', payload);
+            },
+
+            // DEUNA STEP — payment submitted, waiting on the processor/Apple.
+            onPaymentProcessing: () => {
+              log('info', 'apple:onPaymentProcessing');
+            },
+
+            // DEUNA STEP — payment succeeded. We explicitly close the widget
+            // afterwards — DEUNA doesn't auto-close it for us.
+            onSuccess: async (payload) => {
+              log('ok', 'apple:onSuccess', payload);
+              try {
+                await DeunaSDK.close();
+                log('ok', 'apple:widget:closed');
+              } catch (closeError) {
+                log('err', 'apple:close:error', closeError && closeError.message ? closeError.message : closeError);
+              }
+              setLoading(payBtn, false, 'Pagar');
+            },
+
+            // DEUNA STEP — catch-all event stream from the widget (analytics,
+            // step tracking, etc). Useful for debugging things not covered by
+            // the callbacks above.
+            onEventDispatch: (type, data) => {
+              log('neutral', 'apple:event:' + type, data);
+            },
+          },
         });
       } else {
         console.error('Apple Pay is not available on this device.');
