@@ -94,7 +94,7 @@
         // Render button for Apple Pay and append a listener (EXAMPLE)
         DeunaSDK.initPaymentWidget({
           orderToken,
-          paymentMethods: [
+         /* paymentMethods: [
             {
               paymentMethod: 'card_wallet',
               processors: ['apple_pay'],
@@ -102,7 +102,7 @@
                 // express: true // uncomment for auto-purchase / one-tap flow
               },
             },
-          ],
+          ],*/
           callbacks: {
             // DEUNA STEP — fires when the widget detects a card BIN as the
             // user types (not relevant to Apple Pay itself, but part of the
