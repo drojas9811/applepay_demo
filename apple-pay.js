@@ -87,6 +87,7 @@
       // for the merchant instead.
       await DeunaSDK.initPaymentWidget({
         orderToken,
+        /*
         paymentMethods: [
           {
             paymentMethod: 'card_wallet',
@@ -96,6 +97,7 @@
             },
           },
         ],
+        */
         callbacks: {
           // DEUNA STEP — fires when the widget detects a card BIN as the
           // user types (not relevant to Apple Pay itself, but part of the
