@@ -58,7 +58,7 @@
   // URL for whichever merchant you're demoing if it's not Aeromexico.
   function domainForEnv(env) {
     return env === 'production'
-      ? 'https://aeromexico.pay.sandbox.deuna.com' //https://pay.deuna.com
+      ? 'https://aeromexico.pay.deuna.com/' //https://pay.deuna.com
       : 'https://aeromexico.pay.sandbox.deuna.com';
   }
 
@@ -103,15 +103,7 @@
         // Render button for Apple Pay and append a listener (EXAMPLE)
         DeunaSDK.initPaymentWidget({
           orderToken,
-          paymentMethods: [
-            {
-              paymentMethod: 'wallet',
-              processors: ['apple_pay'],
-              configuration: {
-                // express: true // uncomment for auto-purchase / one-tap flow
-              },
-            },
-          ],
+         
           domain: domainForEnv(env),
           callbacks: {
             // DEUNA STEP — fires when the widget detects a card BIN as the
