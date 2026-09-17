@@ -86,7 +86,7 @@
 
   // ---- Step 1: ask DEUNA which payment methods are enabled, then build the Google Pay button ----
   async function startFlow() {
-    apiKeyValue = document.getElementById('apiKeyGoogle').value.trim();
+    apiKeyValue = document.getElementById('apiKeyGoogle').value.trim() 
     const env = document.getElementById('envGoogle').value;
 
     if (!apiKeyValue) {
