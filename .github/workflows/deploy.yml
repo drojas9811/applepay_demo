@@ -1,0 +1,78 @@
+name: Deploy wallet demo to AWS
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: wallet-demo-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      AWS_ROLE_ARN: ${{ vars.AWS_ROLE_ARN }}
+      S3_BUCKET: ${{ vars.S3_BUCKET }}
+      CLOUDFRONT_DISTRIBUTION_ID: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Validate configuration and JavaScript
+        shell: bash
+        run: |
+          set -euo pipefail
+          for key in AWS_REGION AWS_ROLE_ARN S3_BUCKET CLOUDFRONT_DISTRIBUTION_ID; do
+            test -n "${!key}" || { echo "Missing repository variable: $key"; exit 1; }
+          done
+          node --check apple-pay.js
+          node --check google-pay.js
+          test -s .well-known/apple-developer-merchantid-domain-association
+
+      - name: Authenticate with temporary AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6.2.4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+          role-session-name: github-wallet-${{ github.run_id }}
+
+      - name: Upload website files
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Explicit allowlist: never upload repository metadata or credentials.
+          for file in apple-pay.js google-pay.js; do
+            aws s3 cp "$file" "s3://$S3_BUCKET/$file" \
+              --content-type 'application/javascript; charset=utf-8' \
+              --cache-control 'public, max-age=300' --only-show-errors
+          done
+          aws s3 cp .well-known/apple-developer-merchantid-domain-association \
+            "s3://$S3_BUCKET/.well-known/apple-developer-merchantid-domain-association" \
+            --content-type 'text/plain; charset=utf-8' \
+            --cache-control 'public, max-age=300' --only-show-errors
+          aws s3 cp index.html "s3://$S3_BUCKET/index.html" \
+            --content-type 'text/html; charset=utf-8' \
+            --cache-control 'no-cache' --only-show-errors
+
+      - name: Refresh CloudFront cache
+        shell: bash
+        run: |
+          set -euo pipefail
+          invalidation_id=$(aws cloudfront create-invalidation \
+            --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" \
+            --paths '/' '/index.html' '/apple-pay.js' '/google-pay.js' \
+              '/.well-known/apple-developer-merchantid-domain-association' \
+            --query 'Invalidation.Id' --output text)
+          aws cloudfront wait invalidation-completed \
+            --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" \
+            --id "$invalidation_id"

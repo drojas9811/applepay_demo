@@ -1,0 +1,25 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "UploadWebsiteOnly",
+      "Effect": "Allow",
+      "Action": "s3:PutObject",
+      "Resource": [
+        "arn:aws:s3:::BUCKET_NAME/index.html",
+        "arn:aws:s3:::BUCKET_NAME/apple-pay.js",
+        "arn:aws:s3:::BUCKET_NAME/google-pay.js",
+        "arn:aws:s3:::BUCKET_NAME/.well-known/apple-developer-merchantid-domain-association"
+      ]
+    },
+    {
+      "Sid": "RefreshWebsiteCache",
+      "Effect": "Allow",
+      "Action": [
+        "cloudfront:CreateInvalidation",
+        "cloudfront:GetInvalidation"
+      ],
+      "Resource": "arn:aws:cloudfront::ACCOUNT_ID:distribution/DISTRIBUTION_ID"
+    }
+  ]
+}
