@@ -110,7 +110,7 @@
         method: 'GET',
         headers: {
           'X-API-KEY': apiKeyValue,
-          'x-store-code': '99500',
+          'x-store-code': 'all',
         },
       });
 
