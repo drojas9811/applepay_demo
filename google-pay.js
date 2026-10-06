@@ -144,7 +144,7 @@
       // Google Pay JS API; everything else (isReadyToPay, createButton,
       // loadPaymentData) is called on this instance.
       paymentsClient = new google.payments.api.PaymentsClient({
-        environment: gpayEnvFor(env),
+        environment: 'PRODUCTION'
       });
 
       // GOOGLE PAY STEP — check whether this browser/device can actually
